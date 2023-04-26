@@ -29,6 +29,11 @@
 
 # Инструкция по запуску сервиса
 
-- ### Создайте файл appsettings.json в папке проекта. Содержимое по умолчанию не меняйте, добавьте параметр для подключения к Вашей базе данных: <br> `{ "ConnectionStrings": { "OrdersDatabase": "Server=YourServer;Port=YourPort;Database=YourDatabase;User Id=YourId;Password=YourPassword"}}`
-- ### Проведите миграции: в терминале введите `dotnet ef database update`
-- ### Для тестирования перейдите по адресу `yourhost:port/swagger`
+- **Создайте файл `appsettings.json` в папке проекта. Содержимое по умолчанию не меняйте, добавьте параметр для подключения к _Вашей_ базе данных**: <br> 
+    ```
+    "ConnectionStrings" : {
+       "OrdersDatabase": "Server=YourServer;Port=YourPort;Database=YourDatabase;User Id=YourId;Password=YourPassword"
+    }
+    ```
+- **Проведите миграции: в терминале введите** `dotnet ef database update`
+- **Для тестирования перейдите по адресу** `yourhost:port/swagger`
