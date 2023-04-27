@@ -42,7 +42,7 @@ public class UpdateOperation : ControllerBase
 
         var closedStatuses = new List<OrderStatus>
             {OrderStatus.Paid, OrderStatus.SentToDelivery, OrderStatus.Delivered, OrderStatus.Completed};
-        if (closedStatuses.Contains(dto.Status))
+        if (closedStatuses.Contains(entity.Status))
         {
             return BadRequest($"Order with statuses '{string.Join(" ", closedStatuses)} is readonly'");
         }
