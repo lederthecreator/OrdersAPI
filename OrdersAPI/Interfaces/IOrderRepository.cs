@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OrdersAPI.DTO;
-using OrdersAPI.Entities;
+﻿using OrdersAPI.Entities;
 using OrdersAPI.Enums;
 using OrdersAPI.Models;
 

@@ -18,7 +18,7 @@ public class CreateOperation : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<ActionResult<OrderDto>> Create(CreateOrderDto dto)
+    public ActionResult<OrderDto> Create(CreateOrderDto dto)
     {
         if (dto.Id == default(Guid))
         {

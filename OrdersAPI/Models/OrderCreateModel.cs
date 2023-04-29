@@ -1,5 +1,4 @@
 ﻿using OrdersAPI.DTO;
-using OrdersAPI.Enums;
 
 namespace OrdersAPI.Models;
 

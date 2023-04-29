@@ -1,6 +1,4 @@
-﻿using OrdersAPI.DTO;
-
-namespace OrdersAPI.Models;
+﻿namespace OrdersAPI.Models;
 
 /// <summary>
 /// Модель редактирования заказа.

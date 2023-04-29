@@ -1,6 +1,4 @@
-﻿using OrdersAPI.Enums;
-
-namespace OrdersAPI.DTO;
+﻿namespace OrdersAPI.DTO;
 
 /// <summary>
 /// DTO для редактирования записи.
