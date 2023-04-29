@@ -81,6 +81,7 @@ public class OrderRepository : IOrderRepository
         {
             _context.OrderLines.Add(new OrderLine
             {
+                Id = model.Id,
                 Quantity = model.Quantity,
                 OrderId = model.OrderId
             });
