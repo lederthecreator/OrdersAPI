@@ -24,7 +24,7 @@ public class ListOperation : ControllerBase
             .Select(x => new OrderDto
             {
                 Id = x.Id,
-                Status = x.Status,
+                Status = x.Status.ToString(),
                 Created = x.Created,
                 Lines = x.Lines.Select(y => new LineDto
                 {

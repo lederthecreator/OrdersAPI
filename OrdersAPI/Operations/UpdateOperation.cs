@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrdersAPI.DTO;
-using OrdersAPI.Enums;
 using OrdersAPI.Interfaces;
+using OrdersAPI.Models;
 
 namespace OrdersAPI.Operations;
 
@@ -10,21 +10,20 @@ namespace OrdersAPI.Operations;
 public class UpdateOperation : ControllerBase
 {
     private readonly IOrderRepository _repository;
+    private readonly IOrderUpdateService _updateService;
 
-    public UpdateOperation(IOrderRepository repository)
+    public UpdateOperation(
+        IOrderRepository repository, 
+        IOrderUpdateService updateService)
     {
         _repository = repository;
+        _updateService = updateService;
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<OrderDto>> Update(Guid id, UpdateOrderDto dto)
+    public ActionResult<OrderDto> Update(Guid id, UpdateOrderDto dto)
     {
-        if (id != dto.Id)
-        {
-            return BadRequest();
-        }
-
-        var entity = await _repository.Get(id);
+        var entity = _repository.Get(id);
         if (entity == null)
         {
             return NotFound();
@@ -34,28 +33,32 @@ public class UpdateOperation : ControllerBase
         {
             return BadRequest("Order must have order lines.");
         }
-        
-        if (dto.Lines.Any(x => x.Quantity < 1))
-        {
-            return BadRequest("The quantity must not be less than 1");
-        }
 
-        var closedStatuses = new List<OrderStatus>
-            {OrderStatus.Paid, OrderStatus.SentToDelivery, OrderStatus.Delivered, OrderStatus.Completed};
-        if (closedStatuses.Contains(entity.Status))
+        try
         {
-            return BadRequest($"Order with statuses '{string.Join(" ", closedStatuses)} is readonly'");
-        }
+            var updateModel = new OrderUpdateModel
+            {
+                EntityId = entity.Id,
+                Status = dto.Status,
+                Lines = dto.Lines.Select(x => new LineModel
+                {
+                    Id = x.Id, 
+                    Quantity = x.Quantity,
+                    OrderId = entity.Id
+                }).ToList()
+            };
 
-        if (!await _repository.Update(entity, dto))
+            _updateService.Execute(updateModel);
+        }
+        catch (Exception ex)
         {
-            return BadRequest();
+            return BadRequest(ex.Message);
         }
 
         var orderDto = new OrderDto
         {
             Id = entity.Id,
-            Status = entity.Status,
+            Status = entity.Status.ToString(),
             Created = entity.Created,
             Lines = entity.Lines.Select(x => new LineDto
             {

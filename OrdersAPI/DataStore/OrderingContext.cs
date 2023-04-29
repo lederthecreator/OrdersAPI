@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrdersAPI.Entities;
+using OrdersAPI.Enums;
 
-namespace OrdersAPI.Context;
+namespace OrdersAPI.DataStore;
 
 public class OrderingContext : DbContext
 {
@@ -16,8 +17,21 @@ public class OrderingContext : DbContext
     public OrderingContext(IConfiguration configuration)
     {
         Configuration = configuration;
+        Database.Migrate();
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
         optionsBuilder.UseNpgsql(Configuration.GetConnectionString("OrdersDatabase"));
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder
+            .Entity<Order>()
+            .Property(x => x.Status)
+            .HasConversion(
+                x => x.ToString(),
+                x => (OrderStatus) Enum.Parse(typeof(OrderStatus), x));
+    }
 }

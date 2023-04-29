@@ -2,11 +2,18 @@
 
 namespace OrdersAPI.DTO;
 
+/// <summary>
+/// DTO для редактирования записи.
+/// </summary>
 public class UpdateOrderDto
 {
-    public Guid Id { get; set; }
+    /// <summary>
+    /// Статус.
+    /// </summary>
+    public string Status { get; set; }
     
-    public OrderStatus Status { get; set; }
-    
+    /// <summary>
+    /// Связанные сущности.
+    /// </summary>
     public List<LineDto> Lines { get; set; }
 }

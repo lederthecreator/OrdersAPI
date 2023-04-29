@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrdersAPI.DTO;
 using OrdersAPI.Entities;
-using OrdersAPI.Enums;
 using OrdersAPI.Interfaces;
+using OrdersAPI.Models;
 
 namespace OrdersAPI.Operations;
 
@@ -10,11 +10,11 @@ namespace OrdersAPI.Operations;
 [Route("/orders")]
 public class CreateOperation : ControllerBase
 {
-    private readonly IOrderRepository _repository;
+    private readonly IOrderCreateService _createService;
 
-    public CreateOperation(IOrderRepository repository)
+    public CreateOperation(IOrderCreateService createService)
     {
-        _repository = repository;
+        _createService = createService;
     }
 
     [HttpPost("")]
@@ -30,25 +30,34 @@ public class CreateOperation : ControllerBase
             return BadRequest("Empty lines");
         }
 
-        if (dto.Lines.Any(x => x.Quantity < 1))
+        var createModel = new OrderCreateModel
         {
-            return BadRequest("The quantity must not be less than 1");
+            EntityId = dto.Id,
+            Lines = dto.Lines
+        };
+
+        Order? entity = null;
+        try
+        {
+            entity = _createService.Execute(createModel);
+        }
+        catch(Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
 
-        var entity = new Order
+        var orderDto = new OrderDto
         {
-            Id = dto.Id,
-            Created = DateTime.Now,
-            Status = OrderStatus.New,
-            Lines = dto.Lines.Select(x => new OrderLine
+            Id = entity.Id,
+            Created = entity.Created,
+            Status = entity.Status.ToString(),
+            Lines = entity.Lines.Select(x => new LineDto
             {
                 Id = x.Id,
                 Quantity = x.Quantity
             }).ToList()
         };
 
-        await _repository.Create(entity);
-
-        return Created($"{Request.Path}/{entity.Id}", entity);
+        return Created($"{Request.Path}/{orderDto.Id}", orderDto);
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using OrdersAPI.Context;
+using OrdersAPI.DataStore;
 
 #nullable disable
 
@@ -29,10 +29,11 @@ namespace OrdersAPI.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -60,13 +61,11 @@ namespace OrdersAPI.Migrations
 
             modelBuilder.Entity("OrdersAPI.Entities.OrderLine", b =>
                 {
-                    b.HasOne("OrdersAPI.Entities.Order", "Order")
+                    b.HasOne("OrdersAPI.Entities.Order", null)
                         .WithMany("Lines")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("OrdersAPI.Entities.Order", b =>

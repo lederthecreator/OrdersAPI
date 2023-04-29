@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OrdersAPI.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using OrdersAPI.Entities;
+using OrdersAPI.Enums;
 using OrdersAPI.Interfaces;
+using OrdersAPI.Models;
 
-namespace OrdersAPI.Context;
+namespace OrdersAPI.DataStore;
 
 /// <inheritdoc cref="IOrderRepository"/>
 public class OrderRepository : IOrderRepository
@@ -18,31 +17,32 @@ public class OrderRepository : IOrderRepository
     }
     
     /// <inheritdoc/>
-    public async Task<int> Create(Order entity)
+    public Order Create(Order entity)
     {
         _context.Orders.Add(entity);
-        return await _context.SaveChangesAsync();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Order?> Get(Guid id)
-    {
-        var entity = await _context.Orders
-            .Include(x => x.Lines)
-            .FirstOrDefaultAsync(x => x.Id == id);
+        _context.SaveChanges();
 
         return entity;
     }
 
     /// <inheritdoc/>
-    public async Task<bool> Delete(Order entity)
+    public Order? Get(Guid id)
+    {
+        var entity = _context.Orders
+            .Include(x => x.Lines)
+            .FirstOrDefault(x => x.Id == id);
+
+        return entity;
+    }
+
+    /// <inheritdoc/>
+    public bool Delete(Order entity)
     {
         var hasErrors = false;
         try
         {
             _context.Orders.Remove(entity);
-
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
         catch (Exception ex)
         {
@@ -53,23 +53,13 @@ public class OrderRepository : IOrderRepository
     }
 
     /// <inheritdoc/>
-    public async Task<bool> Update(Order entity, UpdateOrderDto dto)
+    public bool Update(Guid id, OrderStatus status)
     {
-        if (dto.Status != entity.Status)
-        {
-            entity.Status = dto.Status;
-        }
+        var entity = Get(id);
 
-        foreach (var line in entity.Lines)
-        {
-            var lineDto = dto.Lines.FirstOrDefault(x => x.Id == line.Id);
-            if (lineDto != null && lineDto.Quantity != line.Quantity)
-            {
-                line.Quantity = lineDto.Quantity;
-            }
-        }
-
-        await _context.SaveChangesAsync();
+        entity.Status = status;
+        
+        _context.SaveChanges();
 
         return true;
     }
@@ -82,5 +72,47 @@ public class OrderRepository : IOrderRepository
             .ToList();
         
         return baseQuery;
+    }
+    
+    /// <inheritdoc/>
+    public void MassCreateLines(List<LineModel> models)
+    {
+        foreach (var model in models)
+        {
+            _context.OrderLines.Add(new OrderLine
+            {
+                Quantity = model.Quantity,
+                OrderId = model.OrderId
+            });
+            
+            _context.SaveChanges();
+        } 
+    }
+
+    /// <inheritdoc/>
+    public void MassDeleteLines(List<Guid> idsToDelete)
+    {
+        foreach (var id in idsToDelete)
+        {
+            var entity = _context.OrderLines.FirstOrDefault(x => x.Id == id);
+            if (entity == null)
+            {
+                throw new Exception("Not found");
+            }
+
+            _context.OrderLines.Remove(entity);
+            _context.SaveChanges();
+        }
+    }
+
+    /// <inheritdoc/>
+    public void MassUpdateLines(List<LineModel> models)
+    {
+        foreach (var model in models)
+        {
+            var entity = _context.OrderLines.First(x => x.Id == model.Id);
+            entity.Quantity = model.Quantity;
+            _context.SaveChanges();
+        }
     }
 }

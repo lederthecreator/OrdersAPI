@@ -1,9 +1,9 @@
-﻿namespace OrdersAPI.DTO;
+﻿namespace OrdersAPI.Models;
 
 /// <summary>
-/// DTO связанной сущности.
+/// Модель строки LineOrder.
 /// </summary>
-public class LineDto
+public class LineModel
 {
     /// <summary>
     /// Идентификатор.
@@ -14,4 +14,9 @@ public class LineDto
     /// Количество.
     /// </summary>
     public int Quantity { get; set; }
+    
+    /// <summary>
+    /// Идентификатор заказа.
+    /// </summary>
+    public Guid OrderId { get; set; }
 }

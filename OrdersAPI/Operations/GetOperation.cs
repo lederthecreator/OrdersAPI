@@ -16,9 +16,9 @@ public class GetOperation : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<OrderDto>> Get(Guid id)
+    public ActionResult<OrderDto> Get(Guid id)
     {
-        var entity = await _repository.Get(id);
+        var entity = _repository.Get(id);
 
         if (entity == null)
         {
@@ -29,7 +29,7 @@ public class GetOperation : ControllerBase
         {
             Id = entity.Id,
             Created = entity.Created,
-            Status = entity.Status,
+            Status = entity.Status.ToString(),
             Lines = entity.Lines.Select(x => new LineDto
             {
                 Id = x.Id,

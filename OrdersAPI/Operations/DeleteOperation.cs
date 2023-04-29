@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrdersAPI.Enums;
 using OrdersAPI.Interfaces;
+using OrdersAPI.Models;
 
 namespace OrdersAPI.Operations;
 
@@ -8,33 +8,29 @@ namespace OrdersAPI.Operations;
 [Route("/orders")]
 public class DeleteOperation : ControllerBase
 {
-    private readonly IOrderRepository _repository;
+    private readonly IOrderDeleteService _deleteService;
 
-    public DeleteOperation(IOrderRepository repository)
+    public DeleteOperation(IOrderDeleteService deleteService)
     {
-        _repository = repository;
+        _deleteService = deleteService;
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Delete(Guid id)
+    public ActionResult Delete(Guid id)
     {
-        var entity = await _repository.Get(id);
-
-        if (entity == null)
+        var deleteModel = new OrderDeleteModel
         {
-            return NotFound();
-        }
-        
-        var closedStatuses = new List<OrderStatus>
-            {OrderStatus.SentToDelivery, OrderStatus.Delivered, OrderStatus.Completed};
+            EntityId = id
+        };
 
-        if (closedStatuses.Contains(entity.Status))
+        try
         {
-            return BadRequest($"Order with statuses '{string.Join(" ", closedStatuses)} is readonly'");
+            _deleteService.Execute(deleteModel);
+            return Ok();
         }
-
-        var hasErrors = await _repository.Delete(entity);
-        
-        return hasErrors ? BadRequest() : Ok();
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
